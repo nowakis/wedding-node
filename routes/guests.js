@@ -3,16 +3,23 @@ var router = express.Router();
 var db = require('../dbConnection.js');
 var pool = db();
 
-/* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  var query = 'SELECT * FROM guest';
+
+  pool.getConnection(function conn(err, connection) {
+    connection.query(
+        query,
+        [],
+        getCallback(res, connection)
+      );
+  });
 });
 
 router.post('/', function(req, res, next) {
   console.log("Creating guest: " + req.body);
 
-  query = 'INSERT INTO guest SET ?'
-  guest = {
+  var query = 'INSERT INTO guest SET ?';
+  var guest = {
     name: req.body.name,
     email: req.body.email,
     phone: req.body.phone,
@@ -20,13 +27,30 @@ router.post('/', function(req, res, next) {
     confirmed_date: new Date()
   }
 
-  pool.getConnection(function(err, connection) {
+  pool.getConnection(function conn(err, connection) {
     connection.query(
       query,
       guest,
       postCallback(res, connection));
   });
 });
+
+getCallback = function defaultGetCallback(res, con) {
+  return function (err, result) {
+    con.release();
+
+    if (err) {
+      throw err;
+    }
+
+    if (result.length > 0) {
+      res.json(result);
+    } else {
+      res.statusCode = 404;
+      res.send('Error 404: not found.');
+    }
+  }
+}
 
 postCallback = function defaultPostCallback(res, con) {
   return function (err, result) {
