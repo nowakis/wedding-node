@@ -12,7 +12,6 @@ function model(table_name) {
 
   function findAll(callback) {
     var query = 'SELECT * FROM ' + table_name + ';';
-
     executeQuery(query, [], callback);
   };
 
@@ -22,6 +21,7 @@ function model(table_name) {
   }
 
   function executeQuery(query, args, callback) {
+    console.log(query);
     pool.getConnection(function conn(err, connection) {
       connection.query(
           query,
@@ -34,6 +34,10 @@ function model(table_name) {
   function closeConnectionCallback(connection, callback) {
     return function(error, result) {
       connection.release();
+      if (error) {
+        console.log(error);
+      }
+
       callback(error, result);
     }
   };

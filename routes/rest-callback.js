@@ -4,7 +4,7 @@ function defaultGetCallback(res) {
       throw err;
     }
 
-    if (result.length > 0) {
+    if (result) {
       res.json(result);
     } else {
       res.statusCode = 404;
